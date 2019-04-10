@@ -3,6 +3,9 @@ stages:
 - deploy
 - delete
 
+services:
+- docker: dind
+  
 variables:
   DOCKERHUB_URL: leiteam/
 
