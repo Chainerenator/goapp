@@ -1,0 +1,125 @@
+stages:
+- dockerbuild
+- deploy
+- delete
+
+variables:
+  DOCKERHUB_URL: leiteam/
+
+  SERVICE_NAME: goapp 
+
+  DOCKER_IMG: ${DOCKERHUB_URL}${SERVICE_NAME}:${CI_COMMIT_SHA}
+  LATEST_IMG: ${DOCKERHUB_URL}${SERVICE_NAME}:latest
+  PROD_IMG: ${DOCKERHUB_URL}${SERVICE_NAME}:prod-${CI_COMMIT_SHORT_SHA}
+
+before_script:
+- mkdir -p $HOME/.docker && echo "${DOCKER_AUTH_CONFIG}" > $HOME/.docker/config.json && chmod 600 $HOME/.docker/config.json
+
+dockerbuild-prod:
+  stage: dockerbuild
+  before_script:
+  - mkdir -p $HOME/.docker && echo "${DOCKER_AUTH_CONFIG}" > $HOME/.docker/config.json && chmod 600 $HOME/.docker/config.json
+  script:
+  - docker build -t ${DOCKER_IMG} -t ${LATEST_IMG} -t ${PROD_IMG} -f docker/Dockerfile .
+  - docker push ${PROD_IMG}
+  - docker push ${LATEST_IMG}
+  - docker push ${DOCKER_IMG}
+  only:
+  - master
+
+dockerbuild-dev:
+  stage: dockerbuild
+  before_script:
+  - mkdir -p $HOME/.docker && echo "${DOCKER_AUTH_CONFIG}" > $HOME/.docker/config.json && chmod 600 $HOME/.docker/config.json
+  script:
+  - docker build -t ${DOCKER_IMG} -f docker/Dockerfile .
+  - docker push ${DOCKER_IMG}
+  only:
+  - dev  
+
+dockerbuild-branches:
+  stage: dockerbuild
+  before_script:
+  - mkdir -p $HOME/.docker && echo "${DOCKER_AUTH_CONFIG}" > $HOME/.docker/config.json && chmod 600 $HOME/.docker/config.json
+  script:
+  - docker build -t ${DOCKER_IMG} -f docker/Dockerfile .
+  - docker push ${DOCKER_IMG}
+  only:
+    - branches
+  except:
+    - master
+    - dev
+
+deploy-prod:
+  stage: deploy
+  image: byrnedo/alpine-curl:latest
+  script:
+  - curl --http1.0 -X POST
+      -F token=${GITLAB_CI_TOKEN}
+      -F ref=master
+      -F variables[BRANCH_NAME]="prod"
+      -F variables[goapp_IMAGE]=${CI_COMMIT_SHA}
+      -F variables[MICROSERVICE_NAME]=${CI_PROJECT_NAME}
+      -F variables[BASIC_AUTH_PROD]="${BASIC_AUTH_PROD}"
+      https:///api/v4/projects/15/trigger/pipeline
+  dependencies:
+  - dockerbuild-prod
+  only:
+  - master
+
+deploy-dev:
+  stage: deploy
+  image: byrnedo/alpine-curl:latest
+  script:
+  - curl --http1.0 -X POST
+      -F token=${GITLAB_CI_TOKEN}
+      -F ref=master
+      -F variables[BRANCH_NAME]="dev"
+      -F variables[goapp_IMAGE]=${CI_COMMIT_SHA} 
+      -F variables[MICROSERVICE_NAME]=${CI_PROJECT_NAME}
+      -F variables[BASIC_AUTH_DEV]="${BASIC_AUTH_DEV}"
+      https:///api/v4/projects/15/trigger/pipeline
+  dependencies:
+  - dockerbuild-dev
+  only:
+  - dev
+
+deploy-branches:
+  stage: deploy
+  image: byrnedo/alpine-curl:latest
+  script:
+  - curl --http1.0 -X POST
+      -F token=${GITLAB_CI_TOKEN}
+      -F ref=master
+      -F variables[BRANCH_NAME]=${CI_COMMIT_REF_NAME}
+      -F variables[goapp_IMAGE]=${CI_COMMIT_SHA}
+      -F variables[MICROSERVICE_NAME]=${CI_PROJECT_NAME}
+      -F variables[NEED_DELETE]="false"
+      -F variables[BASIC_AUTH_BRANCHES]="${BASIC_AUTH_BRANCHES}"
+      https:///api/v4/projects/15/trigger/pipeline
+  dependencies:
+  - dockerbuild-branches
+  only:
+    - branches
+  except:
+    - master
+    - dev
+
+delete-branches:
+  stage: delete
+  image: byrnedo/alpine-curl:latest
+  script:
+  - curl --http1.0 -X POST
+      -F token=${GITLAB_CI_TOKEN}
+      -F ref=master
+      -F variables[BRANCH_NAME]=${CI_COMMIT_REF_NAME}
+      -F variables[MICROSERVICE_NAME]=${CI_PROJECT_NAME}
+      -F variables[NEED_DELETE]="true"
+      https:///api/v4/projects/15/trigger/pipeline
+  only:
+    - merge_requests
+    - master
+    - dev
+  except:
+    - branches
+
