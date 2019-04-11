@@ -58,9 +58,17 @@ dockerbuild-branches:
 
 deploy-prod:
   stage: deploy
-  image: byrnedo/alpine-curl:latest
+  image: ubuntu:latest
+  before_script:
+  - apt-get update && apt-get install --force-yes -y curl
   script:
-  - curl --http1.0 -X POST -F token=${GITLAB_CI_TOKEN} -F ref=master -F variables[BRANCH_NAME]="prod" -F variables[goapp_IMAGE]=${CI_COMMIT_SHA} -F variables[MICROSERVICE_NAME]=${CI_PROJECT_NAME} https://gitlab.com/api/v4/projects/11781501/trigger/pipeline
+  - curl --http1.0 -X POST
+      -F token=${GITLAB_CI_TOKEN}
+      -F ref=master
+      -F variables[BRANCH_NAME]="prod"
+      -F variables[goapp_IMAGE]=${CI_COMMIT_SHA}
+      -F variables[MICROSERVICE_NAME]=${CI_PROJECT_NAME}
+      https://gitlab.com/api/v4/projects/11781501/trigger/pipeline
   dependencies:
   - dockerbuild-prod
   only:
@@ -68,9 +76,17 @@ deploy-prod:
 
 deploy-dev:
   stage: deploy
-  image: byrnedo/alpine-curl:latest
+  image: ubuntu:latest
+  before_script:
+  - apt-get update && apt-get install --force-yes -y curl
   script:
-  - curl --http1.0 -X POST -F token=${GITLAB_CI_TOKEN} -F ref=master -F variables[BRANCH_NAME]="dev" -F variables[goapp_IMAGE]=${CI_COMMIT_SHA}   -F variables[MICROSERVICE_NAME]=${CI_PROJECT_NAME} https://gitlab.com/api/v4/projects/11781501/trigger/pipeline
+  - curl --http1.0 -X POST
+      -F token=${GITLAB_CI_TOKEN}
+      -F ref=master
+      -F variables[BRANCH_NAME]="dev"
+      -F variables[goapp_IMAGE]=${CI_COMMIT_SHA} 
+      -F variables[MICROSERVICE_NAME]=${CI_PROJECT_NAME}
+      https://gitlab.com/api/v4/projects/11781501/trigger/pipeline
   dependencies:
   - dockerbuild-dev
   only:
@@ -78,9 +94,18 @@ deploy-dev:
 
 deploy-branches:
   stage: deploy
-  image: byrnedo/alpine-curl:latest
+  image: ubuntu:latest
+  before_script:
+  - apt-get update && apt-get install --force-yes -y curl
   script:
-  - curl --http1.0 -X POST -F token=${GITLAB_CI_TOKEN} -F ref=master -F variables[BRANCH_NAME]=${CI_COMMIT_REF_NAME} -F variables[goapp_IMAGE]=${CI_COMMIT_SHA} -F variables[MICROSERVICE_NAME]=${CI_PROJECT_NAME} -F variables[NEED_DELETE]="false" https://gitlab.com/api/v4/projects/11781501/trigger/pipeline
+  - curl --http1.0 -X POST
+      -F token=${GITLAB_CI_TOKEN}
+      -F ref=master
+      -F variables[BRANCH_NAME]=${CI_COMMIT_REF_NAME}
+      -F variables[goapp_IMAGE]=${CI_COMMIT_SHA}
+      -F variables[MICROSERVICE_NAME]=${CI_PROJECT_NAME}
+      -F variables[NEED_DELETE]="false"
+      https://gitlab.com/api/v4/projects/11781501/trigger/pipeline
   dependencies:
   - dockerbuild-branches
   only:
@@ -91,9 +116,17 @@ deploy-branches:
 
 delete-branches:
   stage: delete
-  image: byrnedo/alpine-curl:latest
+  image: ubuntu:latest
+  before_script:
+  - apt-get update && apt-get install --force-yes -y curl
   script:
-  - curl --http1.0 -X POST -F token=${GITLAB_CI_TOKEN} -F ref=master -F variables[BRANCH_NAME]=${CI_COMMIT_REF_NAME} -F variables[MICROSERVICE_NAME]=${CI_PROJECT_NAME} -F variables[NEED_DELETE]="true" https://gitlab.com/api/v4/projects/11781501/trigger/pipeline
+  - curl --http1.0 -X POST
+      -F token=${GITLAB_CI_TOKEN}
+      -F ref=master
+      -F variables[BRANCH_NAME]=${CI_COMMIT_REF_NAME}
+      -F variables[MICROSERVICE_NAME]=${CI_PROJECT_NAME}
+      -F variables[NEED_DELETE]="true"
+      https://gitlab.com/api/v4/projects/11781501/trigger/pipeline
   only:
     - merge_requests
     - master
