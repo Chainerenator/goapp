@@ -94,6 +94,7 @@ deploy-dev:
 
 deploy-branches:
   stage: deploy
+  image: ubuntu:latest
   before_script:
   - apt-get update && apt-get install --force-yes -y curl
   script:
@@ -115,6 +116,7 @@ deploy-branches:
 
 delete-branches:
   stage: delete
+  image: ubuntu:latest
   before_script:
   - apt-get update && apt-get install --force-yes -y curl
   script:
