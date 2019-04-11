@@ -66,7 +66,7 @@ deploy-prod:
       -F variables[BRANCH_NAME]="prod"
       -F variables[goapp_IMAGE]=${CI_COMMIT_SHA}
       -F variables[MICROSERVICE_NAME]=${CI_PROJECT_NAME}
-      https:///api/v4/projects/15/trigger/pipeline
+      https://gitlab.com/api/v4/projects/11781501/trigger/pipeline
   dependencies:
   - dockerbuild-prod
   only:
@@ -82,7 +82,7 @@ deploy-dev:
       -F variables[BRANCH_NAME]="dev"
       -F variables[goapp_IMAGE]=${CI_COMMIT_SHA} 
       -F variables[MICROSERVICE_NAME]=${CI_PROJECT_NAME}
-      https:///api/v4/projects/15/trigger/pipeline
+      https://gitlab.com/api/v4/projects/11781501/trigger/pipeline
   dependencies:
   - dockerbuild-dev
   only:
@@ -99,7 +99,7 @@ deploy-branches:
       -F variables[goapp_IMAGE]=${CI_COMMIT_SHA}
       -F variables[MICROSERVICE_NAME]=${CI_PROJECT_NAME}
       -F variables[NEED_DELETE]="false"
-      https:///api/v4/projects/15/trigger/pipeline
+      https://gitlab.com/api/v4/projects/11781501/trigger/pipeline
   dependencies:
   - dockerbuild-branches
   only:
@@ -118,7 +118,7 @@ delete-branches:
       -F variables[BRANCH_NAME]=${CI_COMMIT_REF_NAME}
       -F variables[MICROSERVICE_NAME]=${CI_PROJECT_NAME}
       -F variables[NEED_DELETE]="true"
-      https:///api/v4/projects/15/trigger/pipeline
+      https://gitlab.com/api/v4/projects/11781501/trigger/pipeline
   only:
     - merge_requests
     - master
