@@ -58,7 +58,7 @@ dockerbuild-branches:
 
 deploy-prod:
   stage: deploy
-  image: byrnedo/alpine-curl:latest
+  image: curlimages/curl:latest
   script:
   - curl --http1.0 -X POST
       -F token=${GITLAB_CI_TOKEN}
