@@ -74,9 +74,7 @@ deploy-prod:
 
 deploy-dev:
   stage: deploy
-  image: ubuntu:latest
-  before_script:
-  - apt-get update && apt-get install --force-yes -y curl
+  image: curlimages/curl:latest
   script:
   - curl --http1.0 -X POST
       -F token=${GITLAB_CI_TOKEN}
@@ -92,7 +90,7 @@ deploy-dev:
 
 deploy-branches:
   stage: deploy
-  image: byrnedo/alpine-curl:latest
+  image: curlimages/curl:latest
   script:
   - curl --http1.0 -X POST
       -F token=${GITLAB_CI_TOKEN}
@@ -112,7 +110,7 @@ deploy-branches:
 
 delete-branches:
   stage: delete
-  image: byrnedo/alpine-curl:latest
+  image: curlimages/curl:latest
   script:
   - curl --http1.0 -X POST
       -F token=${GITLAB_CI_TOKEN}
